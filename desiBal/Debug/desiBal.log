@@ -1,0 +1,21 @@
+﻿Build started 9/28/2014 8:20:36 PM.
+     1>Project "c:\Users\pratika\documents\visual studio 2013\Projects\desiBal\desiBal\desiBal.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\desiBal.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Graphics.cpp desiBal.cpp
+         Graphics.cpp
+         Generating Code...
+         Compiling...
+         desiBal.cpp
+     1>c:\users\pratika\documents\visual studio 2013\projects\desibal\desibal\desibal.cpp(176): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"c:\users\pratika\documents\visual studio 2013\Projects\desiBal\Debug\desiBal.exe" /INCREMENTAL /NOLOGO d2d1.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\users\pratika\documents\visual studio 2013\Projects\desiBal\Debug\desiBal.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"c:\users\pratika\documents\visual studio 2013\Projects\desiBal\Debug\desiBal.lib" /MACHINE:X86 Debug\desiBal.res
+         Debug\desiBal.obj
+         Debug\Graphics.obj
+         Debug\stdafx.obj
+         desiBal.vcxproj -> c:\users\pratika\documents\visual studio 2013\Projects\desiBal\Debug\desiBal.exe
+     1>Done Building Project "c:\Users\pratika\documents\visual studio 2013\Projects\desiBal\desiBal\desiBal.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.85
