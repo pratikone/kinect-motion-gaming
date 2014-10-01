@@ -76,8 +76,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 		// Explicitly check the Kinect frame event since MsgWaitForMultipleObjects
 		// can return for other reasons even though it is signaled.
-		skeleton->Update();
+			skeleton->Update(graphics);
 
+		
 		while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			// If a dialog message will be taken care of by the dialog proc
@@ -110,7 +111,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = MessageRouter;
+	wcex.lpfnWndProc = WndProc;//MessageRouter;
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra = DLGWINDOWEXTRA;
 	wcex.hInstance		= hInstance;
@@ -141,8 +142,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    RECT rect = { 0, 0, 800, 600 };
    AdjustWindowRectEx(&rect, WS_OVERLAPPEDWINDOW, false, WS_EX_OVERLAPPEDWINDOW);
-   hWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0,
-	   rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, hInst, 0);
+  hWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, 0, 0,
+	rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, hInst, NULL);
+
+  // hWnd = CreateDialogParamW(  hInstance, szTitle, NULL, (DLGPROC)WndProc, reinterpret_cast<LPARAM>(skeleton));
 
    if (!hWnd)
    {
@@ -173,16 +176,38 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	//return MessageRouter(hWnd, message, wParam, lParam);
+	
 	PAINTSTRUCT ps;
 
-
+	CSkeletonBasics* pThis = NULL;
 
 	switch (message)
 	{
 
+	case WM_CREATE:
+		
+
+
+		break;
 	
 	case WM_PAINT:
+		//pThis = reinterpret_cast<CSkeletonBasics*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+		pThis = reinterpret_cast<CSkeletonBasics*>(lParam);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+
+		
+		// Bind application window handle
+		skeleton->m_hWnd = hWnd;
+
+		// Init Direct2D
+		D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &(skeleton->m_pD2DFactory));
+
+		// Look for a connected Kinect, and create it if found
 		BeginPaint(hWnd, &ps);
+		skeleton->CreateFirstConnected();
+		/*
 		// TODO: Add any drawing code here...
 		graphics->BeginDraw();
 		graphics->ClearScreen(0.0f, 0.0f, 0.5f);
@@ -196,7 +221,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		graphics->EndDraw();
-		
+		*/
 		EndPaint(hWnd, &ps);
 		
 		break;

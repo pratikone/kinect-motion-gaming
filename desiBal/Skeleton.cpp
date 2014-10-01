@@ -56,11 +56,28 @@ CSkeletonBasics::~CSkeletonBasics()
 /// <summary>
 /// Main processing function
 /// </summary>
-void CSkeletonBasics::Update()
+void CSkeletonBasics::Update( Graphics *graphics)
 {
 	if (NULL == m_pNuiSensor)
 	{
+
+		
+		// If sensor is null, show kaleidoscopic scenery.
+		graphics->BeginDraw();
+		graphics->ClearScreen(0.0f, 0.0f, 0.5f);
+		for (int i = 0; i < 1000; i++){
+		graphics->DrawCircle(rand()%800, rand()%600, rand()%100,
+		(rand()%100) / 100.0f,
+		(rand() % 100) / 100.0f,
+		(rand() % 100) / 100.0f,
+		(rand() % 100) / 100.0f);
+
+		}
+
+		graphics->EndDraw();
+		
 		return;
+		
 	}
 
 	// Wait for 0ms, just quickly test if it is time to process a skeleton
@@ -152,6 +169,9 @@ LRESULT CALLBACK CSkeletonBasics::DlgProc(HWND hWnd, UINT message, WPARAM wParam
 		}
 		*/
 		break;
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	return FALSE;
@@ -500,7 +520,7 @@ void CSkeletonBasics::DiscardDirect2DResources()
 /// <param name="szMessage">message to display</param>
 void CSkeletonBasics::SetStatusMessage(WCHAR * szMessage)
 {
-	SendDlgItemMessageW(m_hWnd, IDC_STATUS, WM_SETTEXT, 0, (LPARAM)szMessage);
+	SendDlgItemMessageW(m_hWnd, IDC_STATIC, WM_SETTEXT, 0, (LPARAM)szMessage);
 }
 
 

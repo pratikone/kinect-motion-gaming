@@ -6,7 +6,7 @@
 
 #pragma once
 
-
+#include "stdafx.h"
 
 class CSkeletonBasics
 {
@@ -52,10 +52,10 @@ public:
 	
 
 	HANDLE                  m_hNextSkeletonEvent;
-	void                    Update();
-
-private:
+	void                    Update(Graphics *graphics);
 	HWND                    m_hWnd;
+
+//private:
 
 	bool                    m_bSeatedMode;
 

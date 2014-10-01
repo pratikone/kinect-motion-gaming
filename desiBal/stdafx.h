@@ -26,6 +26,6 @@
 #pragma comment(lib, "Dwrite")
 
 #include "Resource.h"
-#include "Skeleton.h"
 #include "Graphics.h"
+#include "Skeleton.h"
 
