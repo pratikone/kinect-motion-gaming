@@ -2,6 +2,8 @@
 // Microsoft Visual C++ generated include file.
 // Used by desiBal.rc
 //
+#define IDC_VIDEOVIEW                   1003
+#define IDC_STATUS                      -1
 
 #define IDS_APP_TITLE			103
 

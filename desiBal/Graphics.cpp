@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "Graphics.h"
 
 
 Graphics::Graphics(){

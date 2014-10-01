@@ -1,18 +1,20 @@
 // desiBal.cpp : Defines the entry point for the application.
 //
 
-#include "stdafx.h"
-#include "desiBal.h"
-#include "Graphics.h"
+
+
+#include"stdafx.h"
 
 #define MAX_LOADSTRING 100
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
+HWND hWnd;
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 
 Graphics* graphics;
+CSkeletonBasics *skeleton;
 
 
 // Forward declarations of functions included in this code module:
@@ -20,6 +22,9 @@ ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
+LRESULT CALLBACK MessageRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -29,13 +34,20 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+
+
  	// TODO: Place code here.
-	MSG msg;
+
+
+	MSG       msg = { 0 };
 	HACCEL hAccelTable;
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_DESIBAL, szWindowClass, MAX_LOADSTRING);
+
+	skeleton = new CSkeletonBasics();
+	
 	MyRegisterClass(hInstance);
 
 	graphics = new Graphics();
@@ -49,13 +61,33 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_DESIBAL));
 	
-	// Main message loop:
-	while (GetMessage(&msg, NULL, 0, 0))
+	const int eventCount = 1;
+	HANDLE hEvents[eventCount];
+
+	// Main message loop
+	while (WM_QUIT != msg.message)
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		hEvents[0] = skeleton->m_hNextSkeletonEvent;
+
+		// Check to see if we have either a message (by passing in QS_ALLEVENTS)
+		// Or a Kinect event (hEvents)
+		// Update() will check for Kinect events individually, in case more than one are signalled
+		MsgWaitForMultipleObjects(eventCount, hEvents, FALSE, INFINITE, QS_ALLINPUT);
+
+		// Explicitly check the Kinect frame event since MsgWaitForMultipleObjects
+		// can return for other reasons even though it is signaled.
+		skeleton->Update();
+
+		while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			// If a dialog message will be taken care of by the dialog proc
+			if ((hWnd != NULL) && IsDialogMessageW(hWnd, &msg))
+			{
+				continue;
+			}
+
 			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			DispatchMessageW(&msg);
 		}
 	}
 	
@@ -78,9 +110,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= WndProc;
+	wcex.lpfnWndProc = MessageRouter;
 	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
+	wcex.cbWndExtra = DLGWINDOWEXTRA;
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_DESIBAL));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
@@ -104,8 +136,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   HWND hWnd;
-
+   
    hInst = hInstance; // Store instance handle in our global variable
 
    RECT rect = { 0, 0, 800, 600 };
@@ -142,27 +173,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
 	PAINTSTRUCT ps;
+
+
+
 	switch (message)
 	{
 
-	case WM_COMMAND:
-		wmId    = LOWORD(wParam);
-		wmEvent = HIWORD(wParam);
-		// Parse the menu selections:
-		switch (wmId)
-		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-		break;
+	
 	case WM_PAINT:
 		BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here...
@@ -209,4 +227,12 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+
+LRESULT CALLBACK MessageRouter(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+
+	return skeleton->MessageRouter(hWnd, message, wParam, lParam);
+
 }
