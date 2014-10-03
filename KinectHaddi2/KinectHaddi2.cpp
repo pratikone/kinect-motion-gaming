@@ -43,6 +43,10 @@ m_pBrushBoneInferred(NULL),
 m_pNuiSensor(NULL)
 {
 	ZeroMemory(m_Points, sizeof(m_Points));
+
+	prevPos = { 0, 0, 0, 0 };
+	currPos = { 0, 0, 0, 0 };
+	count = 0;
 }
 
 /// <summary>
@@ -382,8 +386,8 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 		m_Points[i] = SkeletonToScreen(skel.SkeletonPositions[i], windowWidth, windowHeight, inverse);
 	}
 
-	WCHAR *sc_message;
-
+	//WCHAR *sc_message;
+	std::wstring sc_message;
 	switch (skeletonNumber){
 	case 0: sc_message = L"Nigga";
 		break;
@@ -401,9 +405,35 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 
 	if (SUCCEEDED(hr))
 	{
+
+		/*
+		* Check movement FORWARD
+		*/
+		//using this instead of m_Points as it as depth info
+		if (prevPos.z == 0.0f)
+		{
+			prevPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
+		}
+		else{
+
+			currPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
+
+			if (currPos.z - prevPos.z < -0.2f) //moving FORWARD
+			{
+				count = count + 1.0f;
+				prevPos = currPos;
+			}
+			
+		}
+		//count = currPos.z;   //testing
+		//copy text
+		sc_message = sc_message + std::to_wstring(count);
+		//const wchar_t *str = (std::to_wstring(count)).c_str();
+		//wcsncpy_s(sc_message, sizeof(sc_message), str, sizeof(str));
+		//Text over the head
 		m_pRenderTarget->DrawText(
-			sc_message,
-			wcslen(sc_message),
+			sc_message.c_str(),
+			wcslen(sc_message.c_str()),
 			m_pTextFormat,
 			D2D1::RectF(m_Points[NUI_SKELETON_POSITION_HEAD].x - 40,
 						m_Points[NUI_SKELETON_POSITION_HEAD].y - 40 + translationFactor,

@@ -11,7 +11,9 @@
 #include "Dwrite.h"
 #pragma comment(lib, "Dwrite")
 #include <math.h>
+#include <wchar.h>
 #include <stdlib.h>
+#include<string>
 
 class CSkeletonBasics
 {
@@ -20,7 +22,11 @@ class CSkeletonBasics
 
 	static const int        cStatusMessageMaxLen = MAX_PATH * 2;
 
+
 public:
+	Vector4 prevPos, currPos;
+	float count;
+
 	/// <summary>
 	/// Constructor
 	/// </summary>
