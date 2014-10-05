@@ -13,6 +13,18 @@ static const float g_JointThickness = 3.0f;
 static const float g_TrackedBoneThickness = 6.0f;
 static const float g_InferredBoneThickness = 1.0f;
 
+
+enum MotionState{
+	MOTION_RUNNING_FORWARD,
+	MOTION_RUNNING_BACKWARD,
+	MOTION_STANDING
+};
+
+//function prototype
+void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &currPos, float &count);
+
+	CSkeletonBasics *application = NULL;
+
 /// <summary>
 /// Entry point for the application
 /// </summary>
@@ -23,8 +35,10 @@ static const float g_InferredBoneThickness = 1.0f;
 /// <returns>status</returns>
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	CSkeletonBasics application;
-	application.Run(hInstance, nCmdShow);
+	application = new CSkeletonBasics();
+	application->Run(hInstance, nCmdShow);
+
+	delete application;
 }
 
 /// <summary>
@@ -47,6 +61,7 @@ m_pNuiSensor(NULL)
 	prevPos = { 0, 0, 0, 0 };
 	currPos = { 0, 0, 0, 0 };
 	count = 0;
+	state = MOTION_STANDING;
 }
 
 /// <summary>
@@ -405,26 +420,8 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 
 	if (SUCCEEDED(hr))
 	{
-
-		/*
-		* Check movement FORWARD
-		*/
-		//using this instead of m_Points as it as depth info
-		if (prevPos.z == 0.0f)
-		{
-			prevPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
-		}
-		else{
-
-			currPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
-
-			if (currPos.z - prevPos.z < -0.2f) //moving FORWARD
-			{
-				count = count + 1.0f;
-				prevPos = currPos;
-			}
-			
-		}
+		KickassMovement(skel, prevPos, currPos, count);
+		
 		//count = currPos.z;   //testing
 		//copy text
 		sc_message = sc_message + std::to_wstring(count);
@@ -653,4 +650,42 @@ HRESULT CSkeletonBasics::CreateDeviceIndependentResources()
 	}
 
 	return hr;
+}
+
+void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &currPos, float &count)
+{
+	/*
+	* Check movement FORWARD
+	*/
+	//using this instead of m_Points as it as depth info
+	if (prevPos.z == 0.0f)
+	{
+		prevPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
+	}
+	else
+	{
+		currPos = skel.SkeletonPositions[NUI_SKELETON_POSITION_HIP_CENTER];
+
+		if (currPos.z - prevPos.z < -0.2f) //moving FORWARD
+		{	
+			application->state = MOTION_RUNNING_FORWARD;
+			count = count + 1.0f;
+			prevPos = currPos;
+		}
+
+		/*
+		* Check movement BACKWARD
+		*/
+		//using this instead of m_Points as it as depth info
+		if (currPos.z - prevPos.z > 0.2f) //moving BACKWARD
+			{
+				application->state = MOTION_RUNNING_BACKWARD;
+				count = count - 10.0f;
+				prevPos = currPos;
+			}
+	
+
+
+	}
+
 }
