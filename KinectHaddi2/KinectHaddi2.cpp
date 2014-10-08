@@ -422,11 +422,12 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 	{
 		KickassMovement(skel, prevPos, currPos, count);
 		
-		//count = currPos.z;   //testing
+		
 		//copy text
-		sc_message = sc_message + std::to_wstring(count);
-		//const wchar_t *str = (std::to_wstring(count)).c_str();
-		//wcsncpy_s(sc_message, sizeof(sc_message), str, sizeof(str));
+		//sc_message = sc_message + std::to_wstring(count);
+		sc_message = sc_message + application->movement_message;	//WWWW or SSSS for movement
+
+
 		//Text over the head
 		m_pRenderTarget->DrawText(
 			sc_message.c_str(),
@@ -671,6 +672,8 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 			application->state = MOTION_RUNNING_FORWARD;
 			count = count + 1.0f;
 			prevPos = currPos;
+
+			application->movement_message = application->movement_message + L"W"; //Appending W for FORWARD
 		}
 
 		/*
@@ -681,7 +684,9 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 			{
 				application->state = MOTION_RUNNING_BACKWARD;
 				count = count - 10.0f;
-				prevPos = currPos;
+				prevPos = currPos; 
+
+				application->movement_message = application->movement_message + L"S"; //Appending S for BACKWARD
 			}
 	
 

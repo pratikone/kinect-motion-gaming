@@ -27,6 +27,7 @@ public:
 	Vector4 prevPos, currPos;
 	float count;
 	enum MotionState state;
+	std::wstring movement_message;
 
 	/// <summary>
 	/// Constructor
