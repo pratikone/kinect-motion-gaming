@@ -9,19 +9,29 @@
 #include "KinectHaddi2.h"
 #include "resource.h"
 
+
+
+
 static const float g_JointThickness = 3.0f;
 static const float g_TrackedBoneThickness = 6.0f;
 static const float g_InferredBoneThickness = 1.0f;
 
 
+
+
 enum MotionState{
 	MOTION_RUNNING_FORWARD,
 	MOTION_RUNNING_BACKWARD,
+	MOTION_RUNNING_LEFT,
+	MOTION_RUNNING_RIGHT,
 	MOTION_STANDING
 };
 
 //function prototype
 void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &currPos, float &count);
+void KeyPress(INPUT input, CHAR key);
+
+
 
 	CSkeletonBasics *application = NULL;
 
@@ -125,6 +135,9 @@ int CSkeletonBasics::Run(HINSTANCE hInstance, int nCmdShow)
 
 	const int eventCount = 1;
 	HANDLE hEvents[eventCount];
+
+	//execute notepad.exe in background
+	system("START \"\" notepad");
 
 	// Main message loop
 	while (WM_QUIT != msg.message)
@@ -652,9 +665,18 @@ HRESULT CSkeletonBasics::CreateDeviceIndependentResources()
 
 	return hr;
 }
-
+//doggy
 void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &currPos, float &count)
 {
+	MotionState oldstate = application->state;  //storing old state for comparison
+	INPUT input;
+
+	// Set up a generic keyboard event.
+	input.type = INPUT_KEYBOARD;
+	input.ki.wScan = 0; // hardware scan code for key
+	input.ki.time = 0;
+	input.ki.dwExtraInfo = 0;
+
 	/*
 	* Check movement FORWARD
 	*/
@@ -669,11 +691,16 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 
 		if (currPos.z - prevPos.z < -0.2f) //moving FORWARD
 		{	
+
 			application->state = MOTION_RUNNING_FORWARD;
 			count = count + 1.0f;
 			prevPos = currPos;
 
 			application->movement_message = application->movement_message + L"W"; //Appending W for FORWARD
+
+			//Code for figuring out when to stand still
+			if (oldstate == MOTION_RUNNING_BACKWARD )
+				application->state = MOTION_STANDING;
 		}
 
 		/*
@@ -687,10 +714,75 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 				prevPos = currPos; 
 
 				application->movement_message = application->movement_message + L"S"; //Appending S for BACKWARD
+
+				if (oldstate == MOTION_RUNNING_FORWARD )
+					application->state = MOTION_STANDING;
 			}
-	
+		
+		/*
+		* Check movement LEFTWARD
+		*/
+		//using this instead of m_Points as it as depth info
+		if (currPos.x - prevPos.x < -0.2f) //moving LEFTWARD
+		{
+			application->state = MOTION_RUNNING_LEFT;
+			count = count - 10.0f;
+			prevPos = currPos;
 
+			application->movement_message = application->movement_message + L"L"; //Appending L for BACKWARD
 
+			if (oldstate == MOTION_RUNNING_RIGHT)
+				application->state = MOTION_STANDING;
+		}
+
+		/*
+		* Check movement RIGHTWARD
+		*/
+		//using this instead of m_Points as it as depth info
+		if (currPos.x - prevPos.x > 0.2f) //moving RIGHTWARD
+		{
+			application->state = MOTION_RUNNING_RIGHT;
+			count = count - 10.0f;
+			prevPos = currPos;
+
+			application->movement_message = application->movement_message + L"R"; //Appending R for BACKWARD
+
+			if (oldstate == MOTION_RUNNING_LEFT )
+				application->state = MOTION_STANDING;
+		}
+
+		//debug
+		//application->movement_message = std::to_wstring(currPos.x);
+	}
+
+	switch (application->state) {
+
+	case MOTION_STANDING:  
+		break;
+	case MOTION_RUNNING_FORWARD: 
+		KeyPress(input, 'W');
+		break;
+	case MOTION_RUNNING_BACKWARD:
+		KeyPress(input, 'S');
+		break;
+	case MOTION_RUNNING_LEFT:
+		KeyPress(input, 'L');
+		break;
+	case MOTION_RUNNING_RIGHT:
+		KeyPress(input, 'R');
+		break;
 	}
 
 }
+
+
+void KeyPress(INPUT input, CHAR key){
+	// Press the  key
+	input.ki.wVk = VkKeyScan(key);
+	input.ki.dwFlags = 0; // 0 for key press
+	SendInput(1, &input, sizeof(INPUT));
+	//Release the key
+	input.ki.dwFlags = KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+	SendInput(1, &input, sizeof(INPUT));
+}
+
