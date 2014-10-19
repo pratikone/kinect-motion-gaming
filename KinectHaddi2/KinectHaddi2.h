@@ -25,6 +25,7 @@ class CSkeletonBasics
 
 public:
 	Vector4 prevPos, currPos;
+	Vector4 prevRotation, currRotation;
 	float count;
 	enum MotionState state;
 	std::wstring movement_message;

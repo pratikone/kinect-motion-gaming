@@ -28,7 +28,8 @@ enum MotionState{
 };
 
 //function prototype
-void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &currPos, float &count);
+void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &currPos,
+	Vector4 &prevRotation, Vector4 &currRotation, float &count);
 void KeyPress(INPUT input, CHAR key);
 
 
@@ -70,6 +71,10 @@ m_pNuiSensor(NULL)
 
 	prevPos = { 0, 0, 0, 0 };
 	currPos = { 0, 0, 0, 0 };
+
+	prevRotation = { 0, 0, 0, 0 };
+	currRotation = { 0, 0, 0, 0 };
+
 	count = 0;
 	state = MOTION_STANDING;
 }
@@ -137,7 +142,7 @@ int CSkeletonBasics::Run(HINSTANCE hInstance, int nCmdShow)
 	HANDLE hEvents[eventCount];
 
 	//execute notepad.exe in background
-	system("START \"\" notepad");
+	//system("START \"\" notepad");
 
 	// Main message loop
 	while (WM_QUIT != msg.message)
@@ -414,6 +419,8 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 		m_Points[i] = SkeletonToScreen(skel.SkeletonPositions[i], windowWidth, windowHeight, inverse);
 	}
 
+	
+
 	//WCHAR *sc_message;
 	std::wstring sc_message;
 	switch (skeletonNumber){
@@ -433,7 +440,8 @@ void CSkeletonBasics::DrawSkeleton(const NUI_SKELETON_DATA & skel, int windowWid
 
 	if (SUCCEEDED(hr))
 	{
-		KickassMovement(skel, prevPos, currPos, count);
+		//doggy
+		KickassMovement(skel, prevPos, currPos, prevRotation, currRotation, count);
 		
 		
 		//copy text
@@ -666,7 +674,8 @@ HRESULT CSkeletonBasics::CreateDeviceIndependentResources()
 	return hr;
 }
 //doggy
-void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &currPos, float &count)
+void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &currPos,
+										Vector4 &prevRotation, Vector4 &currRotation, float &count)
 {
 	MotionState oldstate = application->state;  //storing old state for comparison
 	INPUT input;
@@ -755,6 +764,22 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 		//application->movement_message = std::to_wstring(currPos.x);
 	}
 
+	//rotation, bitch
+	NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
+	NuiSkeletonCalculateBoneOrientations(&skel, boneOrientations);
+
+	
+	if ( prevRotation.x = 0 )
+		prevRotation =  boneOrientations[NUI_SKELETON_POSITION_HIP_RIGHT].hierarchicalRotation.rotationQuaternion;
+	else{
+
+		currRotation = boneOrientations[NUI_SKELETON_POSITION_HIP_RIGHT].hierarchicalRotation.rotationQuaternion;
+		application->movement_message = application->movement_message + L"T"; //Appending T for TURN
+
+	}
+
+
+
 	switch (application->state) {
 
 	case MOTION_STANDING:  
@@ -777,12 +802,31 @@ void KickassMovement(const NUI_SKELETON_DATA & skel,Vector4 &prevPos, Vector4 &c
 
 
 void KeyPress(INPUT input, CHAR key){
+	
+	int scan_code;
+	switch (key){
+
+	case 'W': scan_code = 0x1D;
+		break;
+
+	case 'S': scan_code = 0x1B;
+		break;
+
+	case 'A': scan_code = 0x1C;
+		break;
+
+	case 'D': scan_code = 0x23;
+		break;
+
+	}
+	
 	// Press the  key
-	input.ki.wVk = VkKeyScan(key);
-	input.ki.dwFlags = 0; // 0 for key press
+	input.ki.wVk = 0;  // Discarding VkKeyScan(key)  as I am now using scan codes instead
+	input.ki.dwFlags = KEYEVENTF_SCANCODE;
+	input.ki.wScan = scan_code;
 	SendInput(1, &input, sizeof(INPUT));
 	//Release the key
-	input.ki.dwFlags = KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+	input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
 	SendInput(1, &input, sizeof(INPUT));
 }
 
