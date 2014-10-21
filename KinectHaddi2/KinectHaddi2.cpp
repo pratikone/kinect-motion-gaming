@@ -809,16 +809,16 @@ void KeyPress(INPUT input, CHAR key){
 	int scan_code;
 	switch (key){
 
-	case 'W': scan_code = 0x11;
+	case 'W': scan_code = DIK_W;
 		break;
 
-	case 'S': scan_code = 0x1F;
+	case 'S': scan_code = DIK_S;
 		break;
 
-	case 'A': scan_code = 0x1E;
+	case 'A': scan_code = DIK_A;
 		break;
 
-	case 'D': scan_code = 0x20;
+	case 'D': scan_code = DIK_D;
 		break;
 	
 	}
