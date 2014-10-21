@@ -142,7 +142,7 @@ int CSkeletonBasics::Run(HINSTANCE hInstance, int nCmdShow)
 	HANDLE hEvents[eventCount];
 
 	//execute notepad.exe in background
-	//system("START \"\" notepad");
+	system("START \"\" notepad");
 
 	// Main message loop
 	while (WM_QUIT != msg.message)
@@ -764,6 +764,7 @@ void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &
 		//application->movement_message = std::to_wstring(currPos.x);
 	}
 
+	/*
 	//rotation, bitch
 	NUI_SKELETON_BONE_ORIENTATION boneOrientations[NUI_SKELETON_POSITION_COUNT];
 	NuiSkeletonCalculateBoneOrientations(&skel, boneOrientations);
@@ -774,11 +775,13 @@ void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &
 	else{
 
 		currRotation = boneOrientations[NUI_SKELETON_POSITION_HIP_RIGHT].hierarchicalRotation.rotationQuaternion;
-		application->movement_message = application->movement_message + L"T"; //Appending T for TURN
+		//application->movement_message = application->movement_message + L"T"; //Appending T for TURN
 
+		prevRotation = currRotation;
+		application->movement_message = std::to_wstring( currRotation.x );
 	}
 
-
+	*/
 
 	switch (application->state) {
 
@@ -791,10 +794,10 @@ void KickassMovement(const NUI_SKELETON_DATA & skel, Vector4 &prevPos, Vector4 &
 		KeyPress(input, 'S');
 		break;
 	case MOTION_RUNNING_LEFT:
-		KeyPress(input, 'L');
+		KeyPress(input, 'A');
 		break;
 	case MOTION_RUNNING_RIGHT:
-		KeyPress(input, 'R');
+		KeyPress(input, 'D');
 		break;
 	}
 
@@ -806,24 +809,27 @@ void KeyPress(INPUT input, CHAR key){
 	int scan_code;
 	switch (key){
 
-	case 'W': scan_code = 0x1D;
+	case 'W': scan_code = 0x11;
 		break;
 
-	case 'S': scan_code = 0x1B;
+	case 'S': scan_code = 0x1F;
 		break;
 
-	case 'A': scan_code = 0x1C;
+	case 'A': scan_code = 0x1E;
 		break;
 
-	case 'D': scan_code = 0x23;
+	case 'D': scan_code = 0x20;
 		break;
-
+	
 	}
 	
 	// Press the  key
 	input.ki.wVk = 0;  // Discarding VkKeyScan(key)  as I am now using scan codes instead
 	input.ki.dwFlags = KEYEVENTF_SCANCODE;
+	
 	input.ki.wScan = scan_code;
+	//input.ki.wScan = MapVirtualKey(VkKeyScan(key), MAPVK_VSC_TO_VK);
+	
 	SendInput(1, &input, sizeof(INPUT));
 	//Release the key
 	input.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
